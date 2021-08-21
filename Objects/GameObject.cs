@@ -16,7 +16,7 @@ namespace SiliconGameEngine.Objects
         public string Name { get; private set; }
         public Vector2 Location { get; set; }
         public Physics Physics { get; set; }
-        public Vector2 NextLocation => Location.GetMove(Physics.Velocity);
+        public Vector2 NextLocation => Location.Move(Physics.Velocity);
         public Vector2 Size
         {
             get
@@ -60,6 +60,8 @@ namespace SiliconGameEngine.Objects
 
             if (ObjectId != ObjectId.EMPTY && Id != null)
                 Usable = true;
+
+            Physics = new Physics();
         }
 
         public Texture2D GetFrame(GraphicsDevice device, int i)
@@ -71,10 +73,10 @@ namespace SiliconGameEngine.Objects
             return _frames[i];
         }
 
-        public void IteratePhysics()
+        public void Iterate()
         {
             Physics.Iterate();
-            Location.Move(Physics.Velocity);
+            Location = Location.Move(Physics.Velocity);
         }
     }
 
