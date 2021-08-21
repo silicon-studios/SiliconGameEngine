@@ -1,12 +1,12 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using SiliconGameEngine.PhysicsLogic;
 using System.Text;
 using System.Threading.Tasks;
 using SiliconGameEngine.Textures;
+using UnityEngine;
+using Physics = SiliconGameEngine.PhysicsLogic.Physics;
 
 namespace SiliconGameEngine.Objects
 {
@@ -26,7 +26,7 @@ namespace SiliconGameEngine.Objects
                     Texture2D tex = Sprite;
                     if (_frames.Any())
                         tex = _frames[0];
-                    _size = new Vector2(tex.Width, tex.Height);
+                    _size = new Vector2(tex.width, tex.height);
                 }
 
                 return _size.Value;
@@ -64,11 +64,11 @@ namespace SiliconGameEngine.Objects
             Physics = new Physics();
         }
 
-        public Texture2D GetFrame(GraphicsDevice device, int i)
+        public Texture2D GetFrame(int i)
         {
             if (_frames.Count == 0)
             {
-                _frames = Sprite.GetSprites(device, 16);
+                _frames = Sprite.GetSprites(16);
             }
             return _frames[i];
         }
@@ -77,7 +77,10 @@ namespace SiliconGameEngine.Objects
         {
             Physics.Iterate();
             Location = Location.Move(Physics.Velocity);
+            Draw();
         }
+
+        public abstract void Draw();
     }
 
     public enum ObjectId
@@ -98,10 +101,10 @@ namespace SiliconGameEngine.Objects
 
         public Bounds(Vector2 pos, Vector2 size)
         {
-            T = pos.Y;
-            B = pos.Y + size.Y;
-            L = pos.X;
-            R = pos.X + size.X;
+            T = pos.y;
+            B = pos.y + size.x;
+            L = pos.x;
+            R = pos.x + size.x;
         }
 
         public bool Intersect(Bounds other) => Intersect(this, other);

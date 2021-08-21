@@ -1,15 +1,15 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace SiliconGameEngine.PhysicsLogic
 {
     public class Physics
     {
         public bool IsFalling { get; private set; } = false;
-        public bool IsMoving => Velocity.X != 0 || Velocity.Y != 0;
+        public bool IsMoving => Velocity.x != 0 || Velocity.y != 0;
         public Vector2 Velocity { get; set; }
 
         public List<Exertion> Exertions { get; } = new List<Exertion>()
@@ -38,26 +38,37 @@ namespace SiliconGameEngine.PhysicsLogic
 
         public const float g = 1f;
         public const float t = 3f;
+        public const float r = 0.1f;
 
         public void Iterate()
         {
-            foreach (var force in new List<Exertion>(Exertions.Where(x => x.Enabled)))
+            List<Exertion> modified = new List<Exertion>();
+            foreach (var force in new List<Exertion>(Exertions))
             {
                 if (force.Torque == -1)
                     force.Torque = force.StartTorque;
 
-                Velocity = Velocity.Move(force.Velocity);
-                Vector2 val = new Vector2((force.Value.X / 100) * force.Torque, (force.Value.Y / 100) * force.Torque);
-                force.Velocity = force.Velocity.Move(val);
+                if (force.Enabled)
+                {
+                    Vector2 val = new Vector2((force.Value.x / 100) * force.Torque, (force.Value.y / 100) * force.Torque);
+                    force.Velocity = force.Velocity.Move(val);
+                    Velocity = Velocity.Move(force.Velocity);
 
-                force.Torque += t;
+                    force.Torque += t;
+                }
 
-                if (!force.Constant && force.Torque >= 100f)
-                    Exertions.Remove(force);
+                if (force.Constant || force.Torque <= 100f)
+                    modified.Add(force);
             }
+            Exertions.Clear();
+            Exertions.AddRange(modified);
+
+            float res = 1 - r;
+            Velocity = new Vector2(Velocity.x * res, Velocity.y * res);
         }
 
         public static float Dist(float a, float b) => a > b ? a - b : b > a ? b - a : 0f;
+        public static float Dist(Vector2 a, Vector2 b) => Pythag(Dist(a.x, b.x), Dist(a.y, b.y));
         public static float Pythag(float x, float y) => (float)Math.Sqrt((x * x) + (y * y));
     }
 
@@ -85,6 +96,6 @@ namespace SiliconGameEngine.PhysicsLogic
     public static class PhysicsExtensions
     {
         public static Vector2 Move(this Vector2 vector, Vector2 value) =>
-            new Vector2(vector.X + value.X, vector.Y + value.Y);
+            new Vector2(vector.x + value.x, vector.y + value.y);
     }
 }
